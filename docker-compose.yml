@@ -1,0 +1,51 @@
+version: "3"
+
+services:
+  front:
+    build:
+      context: .
+      dockerfile: front.dockerfile
+    container_name: front
+    volumes:
+      - ./front:/app
+    ports:
+      - 80:8080
+    depends_on:
+      - api
+
+  api:
+    build:
+      context: .
+      dockerfile: app.dockerfile
+    container_name: api
+    volumes:
+      - ./app:/app
+    ports:
+      - 8000:80
+    command: uvicorn api.main:app --host 0.0.0.0 --port 80 --reload
+    environment:
+      POSTGRES_USER: counterpart
+      POSTGRES_PASSWORD: somevunmemoralizablepassword
+      POSTGRES_DB: counterpart_db
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres
+    container_name: db
+    environment:
+      POSTGRES_USER: counterpart
+      POSTGRES_PASSWORD: somevunmemoralizablepassword
+      POSTGRES_DB: counterpart_db
+
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+
+  redis:
+    image: redis
+    command: redis-server
+    ports:
+      - "6379:6379"

@@ -31,3 +31,16 @@ After that you can access:
 
 - [VueJS](https://vuejs.org/)
 - [Bulma](https://bulma.io/)
+
+
+## Next Steps
+
+### Backend:
+- Use a decorator to manage the cache for searches
+- Add unit tests
+
+### Frontend:
+- Create the form to create the cities
+- Show the search history
+- Improve the layout overall
+- Add unit tests

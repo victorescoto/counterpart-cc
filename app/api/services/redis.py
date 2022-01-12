@@ -1,7 +1,8 @@
 import json
 from datetime import timedelta
+from typing import Union
 
-from api.schemas.search import SearchRequest, SearchResponse
+from api.schemas.search import EmptySearch, SearchRequest, SearchResponse
 
 from redis import Redis
 
@@ -20,6 +21,17 @@ class RedisClient(Redis):
             json.dumps(response.dict()),
         )
 
-    def get_search_result(self, request: SearchRequest) -> SearchResponse:
+    def get_search_result(
+        self, request: SearchRequest
+    ) -> Union[SearchResponse, EmptySearch]:
         result = self.get(self.__search_index(request))
-        return SearchResponse(**json.loads(result)) if result else None
+
+        if not result:
+            return None
+
+        result = json.loads(result)
+
+        if "detail" in result:
+            return EmptySearch(**result)
+
+        return SearchResponse(**result)

@@ -1,5 +1,6 @@
 from typing import List, Union
 
+from api.core.decorators import cached
 from api.core.dependencies import get_db
 from api.crud import city as city_crud
 from api.crud import search as search_crud
@@ -11,7 +12,6 @@ from api.schemas.search import (
     SearchResponse,
 )
 from api.schemas.usgs import SearchParams
-from api.services.redis import RedisClient
 from api.services.search import SearchService
 from api.services.usgs import USGSService
 from fastapi import APIRouter, Depends, HTTPException
@@ -29,17 +29,13 @@ def list_searches(db: Session = Depends(get_db)):
 @router.post(
     "/search", response_model=Union[SearchResponse, EmptySearch], tags=["search"]
 )
+@cached
 def search(
     request_params: SearchRequest,
     db: Session = Depends(get_db),
     usgs_service: USGSService = Depends(USGSService),
     search_service: SearchService = Depends(SearchService),
-    redis_client: RedisClient = Depends(RedisClient),
 ):
-    response = redis_client.get_search_result(request_params)
-    if response:
-        return response
-
     city = city_crud.get_city(db, request_params.city_id)
 
     if not city:
@@ -59,14 +55,13 @@ def search(
     try:
         results = search_service.format_USGS_results(usgs_search_result, city)
         result = search_service.get_nearest_earthquake(results)
+        response = SearchResponse(
+            city_name=city.name, title=result.title, time=result.time
+        )
     except IndexError:
-        return EmptySearch(detail="No results found")
-
-    response = SearchResponse(city_name=city.name, title=result.title, time=result.time)
+        response = EmptySearch(detail="No results found")
 
     search = SearchDBCreate(**request_params.dict(), result=response)
     search_crud.create_search(db, search)
-
-    redis_client.set_search_result(request_params, response)
 
     return response

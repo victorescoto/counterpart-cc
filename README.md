@@ -32,15 +32,16 @@ After that you can access:
 - [VueJS](https://vuejs.org/)
 - [Bulma](https://bulma.io/)
 
-
 ## Next Steps
 
-### Backend:
+### Backend
+
 - Use a decorator to manage the cache for searches
 - Use Alembic to handle the initial database setup and migrations
 - Add unit tests
 
-### Frontend:
+### Frontend
+
 - Create the form to create the cities
 - Show the search history
 - Improve the layout overall

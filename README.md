@@ -36,7 +36,7 @@ After that you can access:
 
 ### Backend
 
-- Use a decorator to manage the cache for searches
+- ~~Use a decorator to manage the cache for searches~~
 - Use Alembic to handle the initial database setup and migrations
 - Add unit tests
 
